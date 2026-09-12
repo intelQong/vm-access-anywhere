@@ -29,64 +29,47 @@ However, when connecting frequently from a **work laptop**, serious security and
 
 **VM Access Anywhere** completely eliminates the need to install VPN clients or store secret keys on your work laptop.
 
-```
-+-----------------------------------------------------------------------------------+
-|                                  WORK LAPTOP                                      |
-|                                                                                   |
-|   +---------------------------------------------------------------------------+   |
-|   |  Standard Web Browser (Chrome / Edge / Firefox / Safari)                  |   |
-|   |  - Zero files written to disk                                             |   |
-|   |  - Zero network adapters or kernel drivers installed                      |   |
-|   |  - Standard Outbound HTTPS (Port 443) only (Incognito friendly)           |   |
-|   +---------------------------------------------------------------------------+   |
-+-----------------------------------------|-----------------------------------------+
-                                          |
-                                          | HTTPS / WSS (Port 443)
-                                          v
-+-----------------------------------------------------------------------------------+
-|                        CLOUDFLARE GLOBAL EDGE NETWORK                             |
-|                                                                                   |
-|   +---------------------------------------------------------------------------+   |
-|   |  1. DNS Resolution: desktop.intelqong.com                                 |   |
-|   |  2. Cloudflare Zero Trust (Access Gate)                                   |   |
-|   |     - Email One-Time PIN (OTP) / Google SSO / Passkey (FIDO2/WebAuthn)    |   |
-|   |     - Session Timeout Enforcement (e.g., 2h / 4h / per-session)           |   |
-|   |     - Blocks unauthorized traffic BEFORE it reaches your VM               |   |
-|   +---------------------------------------------------------------------------+   |
-+-----------------------------------------|-----------------------------------------+
-                                          |
-                                          | Encrypted Outbound QUIC/HTTP2 Tunnel
-                                          | (NO Inbound Firewall Ports Required!)
-                                          v
-+-----------------------------------------------------------------------------------+
-|                                 TARGET LINUX VM                                   |
-|                                                                                   |
-|   [UFW Firewall: Default Deny Inbound | VM Completely Dark to Port Scanners]      |
-|                                                                                   |
-|   +---------------------------------------------------------------------------+   |
-|   |  cloudflared daemon (systemd service)                                     |   |
-|   |  - Maintains outbound tunnel to Cloudflare Edge                           |   |
-|   |  - Ingress: desktop.yourdomain.com -> http://127.0.0.1:8080/guacamole     |   |
-|   +-------------------------------------|-------------------------------------+   |
-|                                         | Loopback HTTP (127.0.0.1:8080)          |
-|                                         v                                         |
-|   +---------------------------------------------------------------------------+   |
-|   |  Docker: Apache Guacamole Client (Tomcat 9 on native ARM64/AMD64)         |   |
-|   |  - Binds strictly to 127.0.0.1:8080 (invisible to outside network)        |   |
-|   +-------------------------------------|-------------------------------------+   |
-|                                         | Native IPC / TCP (127.0.0.1:4822)       |
-|                                         v                                         |
-|   +---------------------------------------------------------------------------+   |
-|   |  Host daemon: guacd (Compiled Native C Daemon with FreeRDP acceleration)  |   |
-|   |  - Translates RDP to HTML5 Canvas / WebSocket (12MB RAM footprint)        |   |
-|   +-------------------------------------|-------------------------------------+   |
-|                                         | Local RDP (127.0.0.1:3389)              |
-|                                         v                                         |
-|   +---------------------------------------------------------------------------+   |
-|   |  Host XRDP Server (xrdp + sesman)                                         |   |
-|   |  - Launches KDE Plasma / XFCE / GNOME desktop session                     |   |
-|   +---------------------------------------------------------------------------+   |
-+-----------------------------------------------------------------------------------+
+```mermaid
+flowchart TD
+    subgraph Client ["💻 WORK LAPTOP (Zero Footprint)"]
+        direction TB
+        Browser["Standard Web Browser\nChrome / Edge / Firefox / Safari"]
+        BrowserNotes["• Zero bytes saved to disk\n• No VPN clients or TAP drivers\n• Standard Outbound HTTPS (Port 443) only\n• Incognito / Private window friendly"]
+        Browser --- BrowserNotes
+    end
+
+    subgraph Edge ["☁️ CLOUDFLARE GLOBAL EDGE NETWORK"]
+        direction TB
+        DNS["1. DNS Resolution\ndesktop.intelqong.com"]
+        AccessGate["2. Cloudflare Zero Trust (Access Gate)\n• Email One-Time PIN (OTP) or Google SSO\n• FIDO2 Passkey / Hardware Security Key\n• Edge Authentication & Session Timeout"]
+        EdgeProxy["3. Encrypted Anycast Proxy"]
+        DNS --> AccessGate --> EdgeProxy
+    end
+
+    subgraph TargetVM ["🖥️ TARGET LINUX VM (Zero Inbound Ports)"]
+        direction TB
+        subgraph Ingress ["Outbound Secure Tunnel"]
+            Cloudflared["cloudflared Service (Systemd)\nOutbound-only QUIC / TLS Tunnel"]
+        end
+
+        subgraph WebStack ["Guacamole Web Stack"]
+            GuacClient["Guacamole Web Client (Docker)\nNative ARM64 / AMD64 Tomcat 9\nStrictly bound to 127.0.0.1:8080"]
+            GuacdDaemon["guacd Translation Daemon (Systemd)\nNative C FreeRDP Accelerator\n12MB RAM Footprint"]
+        end
+
+        subgraph DesktopSession ["Desktop Environment"]
+            XRDP["Host XRDP Server\nListening on 127.0.0.1:3389"]
+            KDE["KDE Plasma Linux Workstation\nDynamic Scaling | Audio | Clipboard"]
+        end
+
+        Cloudflared -->|"Loopback HTTP"| GuacClient
+        GuacClient -->|"Native IPC (4822)"| GuacdDaemon
+        GuacdDaemon -->|"Localhost RDP"| XRDP
+        XRDP --> KDE
+    end
+
+    Browser -->|"HTTPS / WSS (Port 443)"| DNS
+    EdgeProxy -->|"Outbound QUIC / TLS Tunnel (No open ports)"| Cloudflared
 ```
 
 ---
