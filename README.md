@@ -72,6 +72,12 @@ flowchart TD
     EdgeProxy -->|"Outbound QUIC / TLS Tunnel (No open ports)"| Cloudflared
 ```
 
+### 💡 How It Works (At a Glance)
+1. **Zero-Trace Client**: Connect from any browser (even Incognito). Exactly **0 bytes** of config files, VPN software, or private keys are saved to the work laptop.
+2. **Edge-Level 2FA**: Cloudflare Access intercepts the connection at Cloudflare's edge, requiring multi-factor authentication (Email OTP or FIDO2 Passkey) before any packet can reach your server.
+3. **Outbound-Only Pipe**: A persistent `cloudflared` tunnel initiates an outbound encrypted QUIC stream to Cloudflare, meaning **zero public inbound ports** are ever opened on your VM firewall.
+4. **Local Hardware Bridge**: Apache Guacamole and native `guacd` convert your local XRDP session (`127.0.0.1:3389`) into an interactive HTML5/WebSocket stream with 60 FPS responsiveness, audio, and clipboard sync.
+
 ---
 
 ## ✨ Key Advantages
