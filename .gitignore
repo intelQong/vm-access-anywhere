@@ -1,0 +1,28 @@
+# Environment & Secret files
+.env
+*.key
+*.pem
+*.cert
+*.conf
+id_rsa*
+*.log
+config/user-mapping.xml
+
+# Cloudflare credentials
+.cloudflared/
+credentials.json
+cert.pem
+
+# Database data directories
+postgres_data/
+data/
+
+# Binary artifacts
+webapps/*.war
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
