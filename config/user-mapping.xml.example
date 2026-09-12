@@ -4,7 +4,7 @@
         password="your_strong_password">
         <connection name="KDE Plasma Desktop">
             <protocol>rdp</protocol>
-            <param name="hostname">host.docker.internal</param>
+            <param name="hostname">127.0.0.1</param>
             <param name="port">3389</param>
             <param name="ignore-cert">true</param>
             <param name="resize-method">display-update</param>

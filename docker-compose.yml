@@ -4,26 +4,12 @@ services:
     image: tomcat:9-jre11-slim
     container_name: guacamole-client
     restart: unless-stopped
+    network_mode: host
     environment:
       GUACAMOLE_HOME: /etc/guacamole
-    ports:
-      # Strictly bind to 127.0.0.1 so it cannot be accessed directly from the public internet
-      - "${GUACAMOLE_PORT:-127.0.0.1:8080}:8080"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./webapps/guacamole.war:/usr/local/tomcat/webapps/guacamole.war:ro
       - ./config/index.jsp:/usr/local/tomcat/webapps/ROOT/index.jsp:ro
+      - ./config/server.xml:/usr/local/tomcat/conf/server.xml:ro
       - ./config/guacamole.properties:/etc/guacamole/guacamole.properties:ro
       - ./config/user-mapping.xml:/etc/guacamole/user-mapping.xml:ro
-    networks:
-      - guacnetwork
-
-networks:
-  guacnetwork:
-    name: guacamole_network
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 10.200.1.0/24

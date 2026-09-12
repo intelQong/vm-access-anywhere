@@ -51,7 +51,7 @@ echo "=== [4/4] Verifying Security Port Isolation ==="
 # Verify port 8080 is NOT bound to 0.0.0.0 or public interface
 PUBLIC_BINDING=$(sudo ss -tulpn | grep ':8080' | awk '{print $5}' || true)
 echo "Port 8080 binding: ${PUBLIC_BINDING}"
-if [[ "${PUBLIC_BINDING}" == *"127.0.0.1:8080"* && ! "${PUBLIC_BINDING}" == *"0.0.0.0:8080"* ]]; then
+if [[ "${PUBLIC_BINDING}" == *"127.0.0.1"* && ! "${PUBLIC_BINDING}" == *"0.0.0.0"* && ! "${PUBLIC_BINDING}" == "*:8080" ]]; then
     echo "[OK] Port 8080 is strictly bound to 127.0.0.1 (safe from public internet access)."
 else
     echo "[WARN] Check port binding to ensure it is not exposed on public interfaces."
