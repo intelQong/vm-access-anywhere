@@ -13,7 +13,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./webapps/guacamole.war:/usr/local/tomcat/webapps/guacamole.war:ro
-      - ./webapps/guacamole.war:/usr/local/tomcat/webapps/ROOT.war:ro
+      - ./config/index.jsp:/usr/local/tomcat/webapps/ROOT/index.jsp:ro
       - ./config/guacamole.properties:/etc/guacamole/guacamole.properties:ro
       - ./config/user-mapping.xml:/etc/guacamole/user-mapping.xml:ro
     networks:
