@@ -2,12 +2,28 @@
     <authorize 
         username="your_username" 
         password="your_strong_password">
-        <connection name="KDE Plasma Desktop">
+        <!-- Option 1: Fixed 1080p Full HD (Crisp, normal scale, does not jitter or re-adjust) -->
+        <connection name="KDE Plasma (1080p Full HD - Recommended)">
+            <protocol>rdp</protocol>
+            <param name="hostname">127.0.0.1</param>
+            <param name="port">3389</param>
+            <param name="ignore-cert">true</param>
+            <param name="width">1920</param>
+            <param name="height">1080</param>
+            <param name="dpi">96</param>
+            <param name="enable-audio">true</param>
+            <param name="enable-printing">false</param>
+            <param name="enable-drive">false</param>
+        </connection>
+
+        <!-- Option 2: Dynamic sizing (Adapts to browser window size with fixed 96 DPI) -->
+        <connection name="KDE Plasma (Auto-Resize Window)">
             <protocol>rdp</protocol>
             <param name="hostname">127.0.0.1</param>
             <param name="port">3389</param>
             <param name="ignore-cert">true</param>
             <param name="resize-method">display-update</param>
+            <param name="dpi">96</param>
             <param name="enable-audio">true</param>
             <param name="enable-printing">false</param>
             <param name="enable-drive">false</param>
